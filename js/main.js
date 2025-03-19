@@ -171,35 +171,24 @@ function downloadCompressedImage() {
     
     try {
         console.log('开始下载...');
-        // 使用 fetch 将 base64 转换为 blob
-        fetch(compressedDataUrl)
-            .then(res => res.blob())
-            .then(blob => {
-                console.log('创建下载链接...');
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.style.display = 'none';
-                a.href = url;
-                a.download = `compressed_${currentFile.name}`;
-                
-                // 添加到文档中
-                document.body.appendChild(a);
-                
-                // 触发点击
-                console.log('触发下载...');
-                a.click();
-                
-                // 清理
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(a);
-                console.log('下载完成');
-            })
-            .catch(error => {
-                console.error('下载过程出错:', error);
-                alert('下载失败，请重试！');
-            });
+        
+        // 直接创建下载链接
+        const a = document.createElement('a');
+        a.href = compressedDataUrl;
+        a.download = `compressed_${currentFile.name}`;
+        
+        // 添加到文档中并点击
+        document.body.appendChild(a);
+        console.log('触发下载...');
+        a.click();
+        
+        // 清理
+        setTimeout(() => {
+            document.body.removeChild(a);
+            console.log('下载完成');
+        }, 100);
     } catch (error) {
-        console.error('下载初始化失败:', error);
+        console.error('下载失败:', error);
         alert('下载失败，请重试！');
     }
 }

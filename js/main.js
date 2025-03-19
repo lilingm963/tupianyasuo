@@ -170,33 +170,36 @@ function downloadCompressedImage() {
     }
     
     try {
-        // 创建一个临时的 Blob 对象
-        const byteString = atob(compressedDataUrl.split(',')[1]);
-        const mimeType = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
-        const ab = new ArrayBuffer(byteString.length);
-        const ia = new Uint8Array(ab);
-        
-        for (let i = 0; i < byteString.length; i++) {
-            ia[i] = byteString.charCodeAt(i);
-        }
-        
-        const blob = new Blob([ab], { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        
-        // 创建下载链接
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `compressed_${currentFile.name}`;
-        document.body.appendChild(link);
-        link.click();
-        
-        // 清理
-        setTimeout(() => {
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }, 100);
+        console.log('开始下载...');
+        // 使用 fetch 将 base64 转换为 blob
+        fetch(compressedDataUrl)
+            .then(res => res.blob())
+            .then(blob => {
+                console.log('创建下载链接...');
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `compressed_${currentFile.name}`;
+                
+                // 添加到文档中
+                document.body.appendChild(a);
+                
+                // 触发点击
+                console.log('触发下载...');
+                a.click();
+                
+                // 清理
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                console.log('下载完成');
+            })
+            .catch(error => {
+                console.error('下载过程出错:', error);
+                alert('下载失败，请重试！');
+            });
     } catch (error) {
-        console.error('下载失败:', error);
+        console.error('下载初始化失败:', error);
         alert('下载失败，请重试！');
     }
 }

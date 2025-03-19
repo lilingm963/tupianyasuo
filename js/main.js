@@ -164,18 +164,37 @@ function setQualityPreset(preset) {
 
 // 下载压缩后的图片
 function downloadCompressedImage() {
-    if (!compressedDataUrl || downloadBtn.disabled) {
+    if (!compressedDataUrl) {
         alert('请先压缩图片！');
         return;
     }
     
     try {
+        // 创建一个临时的 Blob 对象
+        const byteString = atob(compressedDataUrl.split(',')[1]);
+        const mimeType = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        
+        const blob = new Blob([ab], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        
+        // 创建下载链接
         const link = document.createElement('a');
+        link.href = url;
         link.download = `compressed_${currentFile.name}`;
-        link.href = compressedDataUrl;
         document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        
+        // 清理
+        setTimeout(() => {
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }, 100);
     } catch (error) {
         console.error('下载失败:', error);
         alert('下载失败，请重试！');

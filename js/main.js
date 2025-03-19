@@ -11,7 +11,6 @@ const originalDimensions = document.getElementById('originalDimensions');
 const compressionRatio = document.getElementById('compressionRatio');
 const qualitySlider = document.getElementById('quality');
 const qualityValue = document.getElementById('qualityValue');
-const compressBtn = document.getElementById('compressBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 
 // 压缩质量预设
@@ -172,9 +171,23 @@ function downloadCompressedImage() {
     try {
         console.log('开始下载...');
         
-        // 直接创建下载链接
+        // 创建一个临时的 Blob 对象
+        const byteString = atob(compressedDataUrl.split(',')[1]);
+        const mimeType = compressedDataUrl.split(',')[0].split(':')[1].split(';')[0];
+        const ab = new ArrayBuffer(byteString.length);
+        const ia = new Uint8Array(ab);
+        
+        for (let i = 0; i < byteString.length; i++) {
+            ia[i] = byteString.charCodeAt(i);
+        }
+        
+        const blob = new Blob([ab], { type: mimeType });
+        const url = window.URL.createObjectURL(blob);
+        
+        // 创建下载链接
         const a = document.createElement('a');
-        a.href = compressedDataUrl;
+        a.style.display = 'none';
+        a.href = url;
         a.download = `compressed_${currentFile.name}`;
         
         // 添加到文档中并点击
@@ -184,6 +197,7 @@ function downloadCompressedImage() {
         
         // 清理
         setTimeout(() => {
+            window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
             console.log('下载完成');
         }, 100);
@@ -230,5 +244,4 @@ qualitySlider.addEventListener('input', (e) => {
     }
 });
 
-compressBtn.addEventListener('click', compressImage);
 downloadBtn.addEventListener('click', downloadCompressedImage); 

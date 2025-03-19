@@ -172,13 +172,26 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .secondary-button {
-    background: #E5E5E5;
-    color: var(--text-color);
+    background-color: var(--secondary-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
 }
 
-.primary-button:hover, .secondary-button:hover {
+.secondary-button:hover:not(:disabled) {
+    background-color: var(--secondary-color-dark);
     transform: translateY(-2px);
-    box-shadow: var(--box-shadow);
+}
+
+.secondary-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* 预设按钮样式 */

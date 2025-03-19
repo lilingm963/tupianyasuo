@@ -68,6 +68,11 @@ function compressImage() {
         return;
     }
 
+    // 禁用下载按钮，直到压缩完成
+    downloadBtn.disabled = true;
+    downloadBtn.style.opacity = '0.5';
+    downloadBtn.style.cursor = 'not-allowed';
+
     console.log('开始压缩图片...');
     console.log('当前压缩质量:', qualitySlider.value);
 
@@ -127,6 +132,11 @@ function compressImage() {
         const ratio = ((1 - compressedBytes / currentFile.size) * 100).toFixed(1);
         compressionRatio.textContent = `${ratio}%`;
         
+        // 启用下载按钮
+        downloadBtn.disabled = false;
+        downloadBtn.style.opacity = '1';
+        downloadBtn.style.cursor = 'pointer';
+        
         console.log('压缩完成:');
         console.log('- 压缩质量:', outputQuality);
         console.log('- 图片类型:', mimeType);
@@ -138,6 +148,10 @@ function compressImage() {
     } catch (error) {
         console.error('压缩失败:', error);
         alert('图片压缩失败，请重试！');
+        // 在压缩失败时也要重置下载按钮状态
+        downloadBtn.disabled = true;
+        downloadBtn.style.opacity = '0.5';
+        downloadBtn.style.cursor = 'not-allowed';
     }
 }
 
@@ -150,14 +164,22 @@ function setQualityPreset(preset) {
 
 // 下载压缩后的图片
 function downloadCompressedImage() {
-    if (!compressedDataUrl) {
+    if (!compressedDataUrl || downloadBtn.disabled) {
         alert('请先压缩图片！');
         return;
     }
-    const link = document.createElement('a');
-    link.download = `compressed_${currentFile.name}`;
-    link.href = compressedDataUrl;
-    link.click();
+    
+    try {
+        const link = document.createElement('a');
+        link.download = `compressed_${currentFile.name}`;
+        link.href = compressedDataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error) {
+        console.error('下载失败:', error);
+        alert('下载失败，请重试！');
+    }
 }
 
 // 事件监听
